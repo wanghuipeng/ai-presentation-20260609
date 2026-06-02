@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 增效工具箱：自定义 Skill、MCP Server 与 Playwright 自动化</title>
+  <link href="libs/prism/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="libs/prism/prism.min.js"></script>
+  <script src="libs/prism/prism-javascript.min.js"></script>
+  <script src="libs/prism/prism-typescript.min.js"></script>
+  <script src="libs/prism/prism-bash.min.js"></script>
+  <script src="libs/prism/prism-json.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0D1117;
+      --bg-secondary: #161B22;
+      --bg-card: #161B22;
+      --accent-cyan: #00E5FF;
+      --accent-blue: #3B82F6;
+      --accent-purple: #8B5CF6;
+      --accent-pink: #ec4899;
+      --accent-orange: #f97316;
+      --accent-green: #10B981;
+      --accent-red: #F43F5E;
+      --text-primary: #FFFFFF;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --neon-glow: 0 0 20px rgba(0, 229, 255, 0.5);
+      --accent-primary: #00E5FF;
+      --accent-secondary: #3B82F6;
+      --gradient-accent: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+      --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+      --border-color: #30363D;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .slides-container {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      background: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    .slide.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .grid-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+    }
+
+    .slide-content {
+      max-width: 1200px;
+      width: 95%;
+      margin: 0 auto;
+      padding: 60px 0;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 120px);
+    }
+
+    .slide-content h2,
+    .slide-content h3,
+    .slide-content p,
+    .slide-content ul,
+    .slide-content ol,
+    .slide-content .card,
+    .slide-content .two-col,
+    .slide-content .three-col,
+    .slide-content .code-block,
+    .slide-content .tag-container {
+      text-align: left;
+      width: 100%;
+    }
+
+    .slide-cover .slide-content {
+      text-align: center;
+      justify-content: center;
+    }
+
+    .slide-cover .slide-content>* {
+      text-align: center;
+    }
+
+    .slide-cover {
+      background: radial-gradient(ellipse at center, #1a1f35 0%, var(--bg-primary) 70%);
+    }
+
+    .cover-subtitle {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-top: 0.5rem;
+      margin-bottom: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .slide-cover h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 60px rgba(0, 229, 255, 0.3);
+    }
+
+    .slide-cover .subtitle {
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    .tech-badge {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      border-radius: 9999px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      letter-spacing: 0.1em;
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--accent-cyan);
+      display: inline-block;
+    }
+
+    h3 {
+      font-size: 1.4rem;
+      color: var(--accent-cyan);
+      margin: 1.2rem 0 0.8rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.5rem;
+      margin: 0.8rem 0;
+    }
+
+    li {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-right: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .tag-cyan {
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+    }
+
+    .tag-purple {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .tag-green {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .tag-orange {
+      background: rgba(249, 115, 22, 0.15);
+      color: var(--accent-orange);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+    }
+
+    .tag-pink {
+      background: rgba(236, 72, 153, 0.15);
+      color: var(--accent-pink);
+      border: 1px solid rgba(236, 72, 153, 0.3);
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 0.8rem 0;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: var(--accent-cyan);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .two-col img {
+      max-width: 100%;
+    }
+
+    .three-col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .screenshot {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .screenshot:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 30px rgba(0, 229, 255, 0.3);
+    }
+
+    .screenshot-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+      margin-top: 0.8rem;
+    }
+
+    .screenshot-small {
+      max-height: 160px;
+    }
+
+    .code-block {
+      background: #1e1e1e;
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      border: 1px solid var(--border-color);
+    }
+
+    .code-block pre {
+      margin: 0;
+      background: transparent !important;
+    }
+
+    .code-block code {
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(0, 229, 255, 0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .toc-toggle {
+      position: fixed;
+      left: 20px;
+      top: 20px;
+      width: 40px;
+      height: 40px;
+      background: rgba(13, 17, 23, 0.95);
+      border: 1px solid #30363D;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 200;
+      transition: all 0.3s ease;
+      animation: toc-blink 2.5s ease-in-out infinite;
+    }
+
+    .toc-toggle:hover {
+      background: rgba(0, 229, 255, 0.2);
+      border-color: rgba(0, 229, 255, 0.5);
+      transform: scale(1.05);
+    }
+
+    @keyframes toc-blink {
+      0%,
+      100% {
+        box-shadow: 0 0 8px rgba(0, 229, 255, 0.2);
+      }
+
+      50% {
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+      }
+    }
+
+    .toc-toggle svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--accent-cyan);
+    }
+
+    .toc-panel {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 300px;
+      height: 100vh;
+      background: #0D1117;
+      border-right: 1px solid #30363D;
+      z-index: 300;
+      transform: translateX(-100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toc-panel.open {
+      transform: translateX(0);
+    }
+
+    .toc-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 250;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .toc-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .toc-header {
+      padding: 20px;
+      border-bottom: 1px solid #30363D;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .toc-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+    }
+
+    .toc-close {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid #30363D;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .toc-close:hover {
+      background: rgba(0, 229, 255, 0.2);
+      border-color: var(--accent-cyan);
+    }
+
+    .toc-close svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--text-secondary);
+    }
+
+    .toc-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+
+    .toc-group {
+      margin-bottom: 8px;
+    }
+
+    .toc-group-header {
+      padding: 10px 20px 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .toc-group-header:hover {
+      background: rgba(0, 229, 255, 0.1);
+    }
+
+    .toc-group-icon {
+      width: 24px;
+      height: 24px;
+      background: rgba(0, 229, 255, 0.15);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+    }
+
+    .toc-group.open .toc-group-icon {
+      background: var(--accent-cyan);
+      color: #0D1117;
+    }
+
+    .toc-group-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .toc-group-arrow {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      transition: transform 0.2s ease;
+    }
+
+    .toc-group.open .toc-group-arrow {
+      transform: rotate(90deg);
+    }
+
+    .toc-group-items {
+      display: none;
+      padding-left: 12px;
+    }
+
+    .toc-group.open .toc-group-items {
+      display: block;
+    }
+
+    .toc-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      border-left: 2px solid transparent;
+      margin-left: 20px;
+    }
+
+    .toc-item:hover {
+      background: rgba(0, 229, 255, 0.08);
+    }
+
+    .toc-item.active {
+      background: rgba(0, 229, 255, 0.12);
+      border-left-color: var(--accent-cyan);
+    }
+
+    .toc-item-num {
+      width: 22px;
+      height: 22px;
+      background: rgba(0, 229, 255, 0.2);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #00E5FF;
+      flex-shrink: 0;
+    }
+
+    .toc-item.active .toc-item-num {
+      background: var(--accent-cyan);
+      color: #0D1117;
+    }
+
+    .toc-item-title {
+      font-size: 0.85rem;
+      color: #E2E8F0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-area {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      width: 44px;
+      height: 44px;
+      background: rgba(13, 17, 23, 0.95);
+      border: 1px solid #30363D;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(0, 229, 255, 0.2);
+      border-color: rgba(0, 229, 255, 0.5);
+    }
+
+    .nav-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text-primary);
+    }
+
+    .page-indicator {
+      display: flex;
+      gap: 8px;
+    }
+
+    .page-dot {
+      width: 10px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .page-dot:hover {
+      background: rgba(0, 229, 255, 0.5);
+    }
+
+    .page-dot.active {
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    }
+
+    .page-number {
+      position: fixed;
+      bottom: 30px;
+      right: 40px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      z-index: 100;
+    }
+
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .lightbox.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .lightbox-close svg {
+      width: 24px;
+      height: 24px;
+      stroke: white;
+    }
+
+    .photo-wall {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 500;
+      padding: 60px 40px 80px;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .photo-wall.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .photo-wall-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .photo-wall-title {
+      font-size: 1.2rem;
+      color: var(--accent-cyan);
+    }
+
+    .photo-wall-close {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .photo-wall-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .photo-wall-close svg {
+      width: 20px;
+      height: 20px;
+      stroke: white;
+    }
+
+    .photo-wall-grid {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      overflow-y: auto;
+      justify-content: center;
+      align-content: flex-start;
+    }
+
+    .photo-wall-item {
+      max-width: calc(33.33% - 16px);
+      max-height: 250px;
+      cursor: pointer;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .photo-wall-item:hover {
+      border-color: var(--accent-cyan);
+      transform: scale(1.03);
+    }
+
+    .photo-wall-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @keyframes titleSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .slide .slide-content>* {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slide.active .slide-content>h2 {
+      animation: titleSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .slide.active.slide-cover h1 {
+      animation: titleSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .slide.active .slide-content>*:not(h2):not(h1) {
+      opacity: 0;
+      animation: fadeInUp 0.5s ease forwards;
+      animation-delay: 0.3s;
+    }
+
+    .slide.active .slide-content>*:nth-child(2) {
+      animation-delay: 0.35s;
+    }
+
+    .slide.active .slide-content>*:nth-child(3) {
+      animation-delay: 0.45s;
+    }
+
+    .slide.active .slide-content>*:nth-child(4) {
+      animation-delay: 0.55s;
+    }
+
+    .slide.active .slide-content>*:nth-child(5) {
+      animation-delay: 0.65s;
+    }
+
+    .slide.active .slide-content>*:nth-child(n+6) {
+      animation-delay: 0.7s;
+    }
+
+    .slide.active.slide-cover .slide-content>* {
+      animation-delay: 0s !important;
+      opacity: 1 !important;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .overview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: left;
+      transition: all 0.3s ease;
+    }
+
+    .overview-card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 229, 255, 0.1);
+    }
+
+    .overview-card h3 {
+      margin: 0 0 0.8rem;
+      font-size: 1.2rem;
+    }
+
+    .overview-card p {
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-purple));
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 1.5rem;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2rem;
+      top: 0.3rem;
+      width: 12px;
+      height: 12px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      transform: translateX(-5px);
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .highlight-box {
+      background: rgba(0, 229, 255, 0.1);
+      border-left: 4px solid var(--accent-cyan);
+      padding: 1rem 1.5rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      width: 100%;
+    }
+
+    .highlight-box.orange {
+      background: rgba(249, 115, 22, 0.1);
+      border-left-color: var(--accent-orange);
+    }
+
+    .highlight-box.green {
+      background: rgba(16, 185, 129, 0.1);
+      border-left-color: var(--accent-green);
+    }
+
+    .highlight-box p {
+      margin: 0;
+      color: var(--text-primary);
+    }
+
+    .highlight-box ul {
+      width: auto;
+    }
+
+    .flow-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin: 1.5rem 0;
+    }
+
+    .flow-step {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    .flow-arrow {
+      color: var(--accent-cyan);
+      font-size: 1.2rem;
+    }
+
+    .process-diagram {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .process-node {
+      display: inline-block;
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      margin: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--accent-cyan);
+    }
+
+    .process-arrow-down {
+      text-align: center;
+      color: var(--accent-cyan);
+      font-size: 1.5rem;
+      margin: 0.5rem 0;
+    }
+
+    @media (max-width: 768px) {
+
+      .two-col,
+      .three-col {
+        grid-template-columns: 1fr;
+      }
+
+      .slide-cover h1 {
+        font-size: 2.5rem;
+      }
+
+      .slide-content {
+        padding: 40px 0;
+      }
+
+      .overview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- TOC Toggle -->
+  <button class="toc-toggle" onclick="toggleTOC()" title="目录 (T)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+
+  <!-- TOC Overlay -->
+  <div class="toc-overlay" onclick="toggleTOC()"></div>
+
+  <!-- TOC Panel -->
+  <nav class="toc-panel" id="tocPanel">
+    <div class="toc-header">
+      <span class="toc-title">目录导航</span>
+      <button class="toc-close" onclick="toggleTOC()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="toc-content" id="tocContent">
+    </div>
+  </nav>
+
+  <!-- Slides Container -->
+  <div class="slides-container" id="slidesContainer">
+
+    <!-- Slide 1: 封面 -->
+    <section class="slide slide-cover active" data-slide="1" data-title="封面">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h1>AI 增效工具</h1>
+        <p class="cover-subtitle">自定义 Skill、MCP Server 与 Playwright 自动化</p>
+        <div class="tech-badge" style="margin-top: 30px;">王会鹏</div>
+      </div>
+    </section>
+
+    <!-- Slide 2: 内容概览 -->
+    <section class="slide" data-slide="2" data-title="内容概览">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>内容概览</h2>
+        <div class="overview-grid">
+          <div class="overview-card">
+            <h3>Skills 积累</h3>
+            <p>fetch-menus：一键备份多环境菜单<br>tech-poster：一键生成知识分享海报</p>
+          </div>
+          <div class="overview-card">
+            <h3>MCP Server</h3>
+            <p>claude-session-monitor：<br>Claude Code 会话监控与 Windows 通知</p>
+          </div>
+          <div class="overview-card">
+            <h3>自动化测试</h3>
+            <p>AI + Playwright 自动化测试方案<br>从 PageAgent 到自研方案</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Skills 积累 ===== -->
+
+    <!-- Slide 3: fetch-menus 背景 -->
+    <section class="slide" data-slide="3" data-title="fetch-menus：背景">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <div class="section-header">
+          <div class="section-icon">📋</div>
+          <h2>fetch-menus：菜单备份 Skill</h2>
+        </div>
+        <h3>痛点</h3>
+        <p>数据同步时可能覆盖其他系统的新增菜单，导致菜单丢失。之前靠后端提醒、前端手动备份，但一个系统有 <strong>6 个环境</strong>（dev/test/pngs/ungs/stngs/production），一个人维护多个系统，手动备份非常繁琐。</p>
+        <div class="highlight-box green">
+          <p><strong>解决方案：</strong>开发 fetch-menus skill，一句话即可单个或批量备份各环境菜单，覆盖 20+ 站点系统。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4: fetch-menus 效果与提示词 -->
+    <section class="slide" data-slide="4" data-title="fetch-menus：效果与提示词">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>fetch-menus：效果与提示词</h2>
+        <div class="two-col">
+          <div>
+            <h3>单个备份</h3>
+            <div class="highlight-box">
+              <p>备份核酸制备系统的dev环境菜单，令牌是 xxxxxxxxxxxxxxxx</p>
+            </div>
+            <h3>批量备份</h3>
+            <div class="highlight-box">
+              <p>备份蛋白生产、荧光定量V2、核酸制备系统的所有环境菜单</p>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3>效果截图</h3>
+              <img src="images/fetch-menus.png" alt="fetch-menus效果" class="screenshot" onclick="openLightbox(this)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 5: tech-poster 背景与效果 -->
+    <section class="slide" data-slide="5" data-title="tech-poster：背景与效果">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <div class="section-header">
+          <div class="section-icon">🎨</div>
+          <h2>tech-poster：知识分享海报 Skill</h2>
+        </div>
+        <div class="two-col">
+          <div>
+            <h3>背景</h3>
+            <p>平时会进行知识分享，以前在群里发文字消息邀请大家参加。现在使用 tech-poster skill 一键生成好看的海报图，直接发到群里。</p>
+            <div class="highlight-box green">
+              <p>从"文字消息"到"精美海报"，提升分享的专业感和参与度</p>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3>海报效果</h3>
+              <img src="images/tech-poster.png" alt="tech-poster效果" class="screenshot" onclick="openLightbox(this)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6: tech-poster 提示词 -->
+    <section class="slide" data-slide="6" data-title="tech-poster：提示词">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>tech-poster：提示词示例</h2>
+        <div class="card">
+          <h3>输入提示词</h3>
+          <div class="code-block">
+            <pre><code>生成一个知识分享海报
+
+时间：2026.04.21
+主题：如何设计并落地一个MCP Server
+主要内容大纲：通过 MCP Server+Skill，用 Nodejs+Playwright 抓取页面，简化指令调用
+分享人：王会鹏
+会议室及时间：东一 （14:00-16:00）</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== MCP Server ===== -->
+
+    <!-- Slide 7: claude-session-monitor 背景与介绍 -->
+    <section class="slide" data-slide="7" data-title="claude-session-monitor：背景与介绍">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <div class="section-header">
+          <div class="section-icon">🔔</div>
+          <h2>claude-session-monitor</h2>
+        </div>
+        <div class="two-col">
+          <div>
+            <h3>背景</h3>
+            <p>Claude Code CLI 没有消息通知功能，任务完成后无法及时得知。需要一个类似 Workbuddy 的消息通知方案。</p>
+            <div class="highlight-box green">
+              <p><strong>定位：</strong>给 Claude Code 每次会话请求加上"开始埋点 + 结束判断 + 条件通知"的本地监控工具</p>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3>技术栈</h3>
+              <p>本地 MCP Server + Claude Code Hooks</p>
+              <img src="images/monitor-arch.png" alt="monitor架构" class="screenshot" onclick="openLightbox(this)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8: 生命周期 -->
+    <section class="slide" data-slide="8" data-title="claude-session-monitor：生命周期">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>生命周期</h2>
+        <img src="images/lifecycle.svg" alt="生命周期" style="max-width: 95%; max-height: 70vh; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.3); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); cursor: pointer;" onclick="openLightbox(this)">
+      </div>
+    </section>
+
+    <!-- Slide 9: 两个工具与效果 -->
+    <section class="slide" data-slide="9" data-title="claude-session-monitor：工具与效果">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>两个工具与通知效果</h2>
+        <div class="two-col" style="align-items: center;">
+          <div>
+            <h3>工具1：get_last_session_status</h3>
+            <p>查看最近一次会话的监控状态：开始时间、结束时间、耗时和是否已通知。</p>
+            <h3>工具2：test_notification</h3>
+            <p>发送 Windows 右下角测试通知，用于验证通知链路是否可用。</p>
+          </div>
+          <div>
+            <div class="screenshot-container">
+              <img src="images/notify-success.png" alt="成功通知" class="screenshot" style="width: 46%; height: 200px; object-fit: cover;" onclick="openLightbox(this)">
+              <img src="images/notify-fail.png" alt="失败通知" class="screenshot" style="width: 46%; height: 200px; object-fit: cover;" onclick="openLightbox(this)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 10: 应用场景与局限 -->
+    <section class="slide" data-slide="10" data-title="claude-session-monitor：场景与局限">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>应用场景与局限性</h2>
+        <div class="two-col" style="align-items: stretch;">
+          <div class="card">
+            <h3>应用场景</h3>
+            <ul>
+              <li>长时间任务完成提醒，不用一直盯着终端等结果</li>
+              <li>会话耗时回溯，评估复杂 prompt 的执行效率</li>
+            </ul>
+            <div class="highlight-box green" style="margin-top: 1rem;">
+              <p>特别适合长编译、批量处理等耗时操作场景</p>
+            </div>
+          </div>
+          <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+            <h3>局限性</h3>
+            <div class="highlight-box orange">
+              <p><strong>Windows 通知限制：</strong>通知只显示 5 秒，这是系统级别的限制，无法突破。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 自动化测试 ===== -->
+
+    <!-- Slide 11: 自动化测试背景 -->
+    <section class="slide" data-slide="11" data-title="自动化测试：背景">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <div class="section-header">
+          <div class="section-icon">🧪</div>
+          <h2>自动化测试初探</h2>
+        </div>
+        <div class="two-col">
+          <div>
+            <h3>背景</h3>
+            <ul>
+              <li>项目开发完成后测试周期长、频次不固定</li>
+              <li>开发环境自测通过，推到测试环境后因数据差异导致报错</li>
+              <li>需要自动化的回归测试保障</li>
+            </ul>
+            <h3>PageAgent 探索</h3>
+            <p>阿里的 GUI Agent，基于 Chrome 插件和大模型进行自动化操作。但体验下来效果不顺畅，MCP Server 处于 beta 阶段，不稳定。</p>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: center;">
+            <img src="images/pageagent.png" alt="PageAgent" style="max-width: 100%; max-height: 60vh; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.3); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); cursor: pointer;" onclick="openLightbox(this)">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 12: PageAgent 问题 -->
+    <section class="slide" data-slide="12" data-title="PageAgent 的问题">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>PageAgent 的问题</h2>
+        <div class="three-col" style="align-items: stretch;">
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h3>功能单一</h3>
+            <p>只是闷着头测试，不给出汇总结果</p>
+            <img src="images/pa-single-func.png" alt="功能单一" class="screenshot" style="margin-top: auto; max-height: 160px; height: 160px; width: 100%; object-fit: cover;" onclick="openLightbox(this)">
+          </div>
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h3>无法获取本地文件</h3>
+            <img src="images/pa-no-file.png" alt="无法获取本地文件" class="screenshot" style="margin-top: auto; max-height: 160px; height: 160px; width: 100%; object-fit: cover;" onclick="openLightbox(this)">
+          </div>
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h3>不记录上下文</h3>
+            <p>每一轮会话都是新的，不记住之前的测试结果</p>
+            <img src="images/pa-no-context.png" alt="不记录上下文" class="screenshot" style="margin-top: auto; max-height: 160px; height: 160px; width: 100%; object-fit: cover;" onclick="openLightbox(this)">
+          </div>
+        </div>
+        <div class="highlight-box orange">
+          <p><strong>结论：</strong>PageAgent 不够成熟，经常莫名报错，无法满足实际需求</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 13: 传统方式 vs AI+Playwright -->
+    <section class="slide" data-slide="13" data-title="传统方式 vs AI+Playwright">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>传统方式 vs AI + Playwright</h2>
+        <div class="two-col">
+          <div class="card">
+            <h3>传统方式</h3>
+            <ul>
+              <li>开发者手动编写 Playwright 脚本<br><span style="font-size:0.9rem;color:var(--text-muted);">如 page.click()、expect().toBeVisible()</span></li>
+              <li>测试用例以代码形式固化在测试文件中</li>
+              <li>维护成本高，UI 变化时需改代码</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>AI + Playwright</h3>
+            <ul>
+              <li>自然语言提示词就是测试用例<br><span style="font-size:0.9rem;color:var(--text-muted);">如："点击登录按钮，输入错误密码，检查是否提示密码错误"</span></li>
+              <li>AI 自动生成对应的 Playwright 脚本</li>
+              <li>通过 AI 工具直接驱动 Playwright 运行</li>
+            </ul>
+          </div>
+        </div>
+        <h3 style="margin-top: 1.5rem;">AI自动化测试工作流</h3>
+        <div class="flow-steps">
+          <span class="flow-step">解析测试文档</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">执行 Playwright 测试</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">生成测试报告</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">汇总结果反馈</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 14: Superpowers 自动修复 -->
+    <section class="slide" data-slide="14" data-title="Superpowers 自动修复">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>结合 Superpowers：自动修复不中断</h2>
+        <div class="two-col" style="align-items: stretch;">
+          <div style="display: flex; flex-direction: column;">
+            <p>借助第三方 skill、MCP server，最大化提升 Playwright 自动化测试效率。</p>
+            <div class="highlight-box green">
+              <p>测试中遇到问题，Superpowers 会自动处理修复，而不是中断任务。修复后继续执行自动化操作，无需人工干预。</p>
+            </div>
+            <div class="card" style="margin-top: auto;">
+              <h3>工作流</h3>
+              <div class="flow-steps">
+                <span class="flow-step">发现问题</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">自动修复</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">继续执行</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-step">完成测试</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: center;">
+            <img src="images/superpowers.png" alt="Superpowers自动修复" style="max-width: 100%; max-height: 55vh; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.3); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); cursor: pointer;" onclick="openLightbox(this)">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 15: 测试文档与工作流 -->
+    <section class="slide" data-slide="15" data-title="测试文档与工作流">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>测试文档驱动自动化</h2>
+        <div class="two-col">
+          <div>
+            <h3>测试文档覆盖内容</h3>
+            <ul>
+              <li>环境配置（URL/Token/浏览器）</li>
+              <li>测试范围（菜单模块/子页面）</li>
+              <li>操作流程（列表/搜索/表单/详情）</li>
+              <li>判定标准（通过/失败/异常）</li>
+              <li>异常处理策略（超时/报错/弹窗）</li>
+              <li>数据清理 & 报告格式</li>
+            </ul>
+          </div>
+          <div>
+            <div class="card">
+              <h3>当前测试范围</h3>
+              <p>蛋白生产系统测试环境（只读模式），适合 dev 阶段进行小颗粒度灰度测试。</p>
+              <img src="images/test-scope.png" alt="测试范围" class="screenshot" onclick="openLightbox(this)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 16: 测试深度 -->
+    <section class="slide" data-slide="16" data-title="测试深度">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>测试深度</h2>
+
+        <div class="three-col" style="align-items: stretch;">
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h3>实验人员 - 列表页面</h3>
+            <img src="images/slide17-list.png" alt="实验人员列表加载" class="screenshot" style="margin-top: auto; max-height: 340px; width: 100%; object-fit: contain; cursor: pointer;" onclick="openLightbox(this)">
+          </div>
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h3>抽提方法 - 编辑打开</h3>
+            <img src="images/slide17-extraction.png" alt="抽提方法编辑打开" class="screenshot" style="max-height: 340px; width: 100%; object-fit: contain; cursor: pointer;" onclick="openLightbox(this)">
+          </div>
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h3>混样方案 - 编辑打开</h3>
+            <img src="images/slide17-mix.png" alt="混样方案编辑打开" class="screenshot" style="max-height: 340px; width: 100%; object-fit: contain; cursor: pointer;" onclick="openLightbox(this)">
+          </div>
+        </div>
+        <div class="highlight-box green" style="margin-top: 1rem;">
+          <p><strong>深度测试能力：</strong>AI + Playwright 自动化从列表页延伸至二级表单详情页，能模拟"编辑打开"等复杂交互，验证页面渲染与数据回填的正确性，整个测试过程就像真人在通过浏览器访问系统。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 17: 结果反馈与不足 -->
+    <section class="slide" data-slide="17" data-title="结果反馈与不足">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>结果反馈与不足</h2>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; align-items: stretch;">
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h3>报告输出</h3>
+            <img src="images/slide16-result.png" alt="测试报告" class="screenshot" style="margin-top: auto; max-height: 120px; height: 120px; width: 100%; object-fit: cover;" onclick="openLightbox(this)">
+          </div>
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h3>报告明细</h3>
+            <img src="images/report-detail.png" alt="报告明细" class="screenshot" style="margin-top: auto; max-height: 120px; height: 120px; width: 100%; object-fit: cover;" onclick="openLightbox(this)">
+          </div>
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h3>测试耗时</h3>
+            <img src="images/test-time.png" alt="耗时" class="screenshot" style="max-height: 120px; height: 120px; width: 100%; object-fit: cover;" onclick="openLightbox(this)">
+          </div>
+          <div class="card" style="display: flex; flex-direction: column;">
+            <h3>截图归档</h3>
+            <img src="images/screenshot-archive.png" alt="测试截图" class="screenshot" style="margin-top: auto; max-height: 120px; height: 120px; width: 100%; object-fit: cover;" onclick="openLightbox(this)">
+          </div>
+        </div>
+        <div class="highlight-box orange" style="margin-top: 1.2rem;">
+          <p><strong>不足：</strong>更复杂的业务流转无法覆盖，测试数据较少，无法进行更深入的自动化测试。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 18: AI 工作流 -->
+    <section class="slide" data-slide="18" data-title="AI 工作流">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>AI 自动化工作流的思考</h2>
+
+        <div style="display: flex; flex-direction: column; gap: 0.6rem; max-width: 900px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-cyan);">
+            <span style="font-size: 1.5rem; min-width: 44px; text-align: center;">🧪</span>
+            <div style="flex: 1;">
+              <p style="margin: 0; color: var(--accent-cyan); font-weight: 600;">1. 自动化系统测试</p>
+              <p style="margin: 0.2rem 0 0; font-size: 0.9rem;">AI + Playwright 按测试文档驱动执行，覆盖列表页、表单详情页等完整业务流程，自动截图留档</p>
+            </div>
+          </div>
+          <div style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
+          <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-blue);">
+            <span style="font-size: 1.5rem; min-width: 44px; text-align: center;">📊</span>
+            <div style="flex: 1;">
+              <p style="margin: 0; color: var(--accent-blue); font-weight: 600;">2. 智能分析测试报告</p>
+              <p style="margin: 0.2rem 0 0; font-size: 0.9rem;">AI 解析测试报告：Minimax MCP 识别控制台/页面截图中的错误，DeepSeek 分析提取的文本信息，精准定位 Bug 根因</p>
+            </div>
+          </div>
+          <div style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
+          <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-purple);">
+            <span style="font-size: 1.5rem; min-width: 44px; text-align: center;">🔧</span>
+            <div style="flex: 1;">
+              <p style="margin: 0; color: var(--accent-purple); font-weight: 600;">3. AI 自动修复代码</p>
+              <p style="margin: 0.2rem 0 0; font-size: 0.9rem;">AI 根据第 2 步的定位信息自动修复问题模块，修复后触发 Playwright 回归测试</p>
+            </div>
+          </div>
+          <div style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
+          <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-orange);">
+            <span style="font-size: 1.5rem; min-width: 44px; text-align: center;">👀</span>
+            <div style="flex: 1;">
+              <p style="margin: 0; color: var(--accent-orange); font-weight: 600;">4. 人工审核 + 复测确认</p>
+              <p style="margin: 0.2rem 0 0; font-size: 0.9rem;">修复完成后 claude-session-monitor MCP 会及时通知提醒开发者，人工 Review 代码变更并执行复测，确保 Bug 真实解决</p>
+            </div>
+          </div>
+          <div style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
+          <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-green);">
+            <span style="font-size: 1.5rem; min-width: 44px; text-align: center;">🚀</span>
+            <div style="flex: 1;">
+              <p style="margin: 0; color: var(--accent-green); font-weight: 600;">5. AI 自动提交代码</p>
+              <p style="margin: 0.2rem 0 0; font-size: 0.9rem;">人工确认后，AI 基于 git-commit-convention Skill 生成 commit message 并推送到远程仓库，闭环交付</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 19: 总结 -->
+    <section class="slide" data-slide="19" data-title="总结">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h2>总结</h2>
+        <div class="overview-grid" style="margin-top: 2rem;">
+          <div class="overview-card">
+            <h3>AI应用开发实战</h3>
+            <p>2 个 Skill + 1 个 MCP Server<br>AI+Playwright 自动化测试方案</p>
+          </div>
+          <div class="overview-card">
+            <h3>工作效率提升</h3>
+            <p>一句话备份 20+ 站点菜单<br>任务完成即时 Windows 通知<br>提示词即测试用例，可定期回归测试</p>
+          </div>
+          <div class="overview-card">
+            <h3>团队应用推广</h3>
+            <p>好用的三方Skills、MCP Server的分享<br>vibe-coding 团队仓库沉淀</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 20: Q&A -->
+    <section class="slide slide-cover" data-slide="20" data-title="Q & A">
+      <div class="grid-bg"></div>
+      <div class="slide-content">
+        <h1>感谢聆听</h1>
+        <div class="tech-badge" style="margin-top: 30px;">THANKS</div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-area">
+    <button class="nav-btn" onclick="prevSlide()" title="上一页 (←)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </button>
+    <div class="page-indicator" id="pageIndicator"></div>
+    <button class="nav-btn" onclick="nextSlide()" title="下一页 (→)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 18l6-6-6-6" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Page Number -->
+  <div class="page-number" id="pageNumber">1 / 18</div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6L6 18M6 6l12 12" />
+      </svg>
+    </button>
+    <img src="" alt="Lightbox" id="lightboxImg">
+  </div>
+
+  <!-- Photo Wall -->
+  <div class="photo-wall" id="photoWall">
+    <div class="photo-wall-header">
+      <span class="photo-wall-title">图片浏览 (↑↓ 切换)</span>
+      <button class="photo-wall-close" onclick="closePhotoWall()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="photo-wall-grid" id="photoWallGrid"></div>
+  </div>
+
+  <script>
+    const tocData = [
+      { title: '封面', icon: '📌', items: [{ index: 0, title: '封面' }] },
+      { title: '内容概览', icon: '📋', items: [{ index: 1, title: '内容概览' }] },
+      {
+        title: 'Skills 积累', icon: '🛠️', items: [
+          { index: 2, title: 'fetch-menus：背景' },
+          { index: 3, title: 'fetch-menus：效果与提示词' },
+          { index: 4, title: 'tech-poster：背景与效果' },
+          { index: 5, title: 'tech-poster：提示词' }
+        ]
+      },
+      {
+        title: 'MCP Server', icon: '🔔', items: [
+          { index: 6, title: '背景与介绍' },
+          { index: 7, title: '生命周期' },
+          { index: 8, title: '工具与效果' },
+          { index: 9, title: '应用场景与局限' }
+        ]
+      },
+      {
+        title: '自动化测试', icon: '🧪', items: [
+          { index: 10, title: '背景与PageAgent探索' },
+          { index: 11, title: 'PageAgent的问题' },
+          { index: 12, title: '传统方式 vs AI+Playwright' },
+          { index: 13, title: 'Superpowers 自动修复' },
+          { index: 14, title: '测试文档与工作流' },
+          { index: 15, title: '测试深度' },
+          { index: 16, title: '结果反馈与不足' },
+          { index: 17, title: 'AI 自动化工作流' }
+        ]
+      },
+      {
+        title: '总结', icon: '📊', items: [
+          { index: 18, title: '归纳总结' },
+          { index: 19, title: 'Q & A' }
+        ]
+      }
+    ];
+
+    let currentSlide = 1;
+    const totalSlides = document.querySelectorAll('.slide').length;
+    let currentPhotoIndex = 0;
+    let photoWallImages = [];
+
+    function init() {
+      generateTOC();
+      generatePageIndicator();
+      updateSlide();
+      if (typeof Prism !== 'undefined') Prism.highlightAll();
+    }
+
+    function generateTOC() {
+      const tocContent = document.getElementById('tocContent');
+      tocContent.innerHTML = tocData.map((group, groupIndex) => `
+        <div class="toc-group">
+          <div class="toc-group-header" onclick="toggleTOCGroup(this)">
+            <div class="toc-group-icon">${group.icon}</div>
+            <span class="toc-group-title">${group.title}</span>
+            <span class="toc-group-arrow">▶</span>
+          </div>
+          <div class="toc-group-items">
+            ${group.items.map(item => `
+              <div class="toc-item" onclick="goToSlide(${item.index + 1})">
+                <span class="toc-item-num">${item.index + 1}</span>
+                <span class="toc-item-title">${item.title}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function generatePageIndicator() {
+      const indicator = document.getElementById('pageIndicator');
+      indicator.innerHTML = '';
+      for (let i = 1; i <= totalSlides; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'page-dot' + (i === 1 ? ' active' : '');
+        dot.onclick = () => goToSlide(i);
+        indicator.appendChild(dot);
+      }
+    }
+
+    function toggleTOC() {
+      document.getElementById('tocPanel').classList.toggle('open');
+      document.querySelector('.toc-overlay').classList.toggle('open');
+    }
+
+    function toggleTOCGroup(header) {
+      header.parentElement.classList.toggle('open');
+    }
+
+    function updateSlide() {
+      document.querySelectorAll('.slide').forEach((slide, index) => {
+        slide.classList.remove('active');
+        if (index + 1 === currentSlide) {
+          slide.classList.add('active');
+        }
+      });
+
+      document.querySelectorAll('.page-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index + 1 === currentSlide);
+      });
+
+      document.getElementById('pageNumber').textContent = `${currentSlide} / ${totalSlides}`;
+
+      document.querySelectorAll('.toc-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      const groupIndex = tocData.findIndex(g => g.items.some(item => item.index + 1 === currentSlide));
+      if (groupIndex !== -1) {
+        document.querySelectorAll('.toc-group')[groupIndex].classList.add('open');
+        const itemEl = document.querySelector(`.toc-item[onclick="goToSlide(${currentSlide})"]`);
+        if (itemEl) itemEl.classList.add('active');
+      }
+
+      if (typeof Prism !== 'undefined') Prism.highlightAll();
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(n) {
+      currentSlide = n;
+      updateSlide();
+      toggleTOC();
+    }
+
+    function openLightbox(img) {
+      event.stopPropagation();
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightboxImg');
+      lightboxImg.src = img.src;
+      lightbox.classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+
+    function openPhotoWall(images, startIndex) {
+      photoWallImages = images;
+      currentPhotoIndex = startIndex;
+      const grid = document.getElementById('photoWallGrid');
+      grid.innerHTML = images.map((img, index) => `
+        <div class="photo-wall-item" onclick="showLightboxFromWall(${index})">
+          <img src="${img.src}" alt="Image ${index + 1}">
+        </div>
+      `).join('');
+      document.getElementById('photoWall').classList.add('active');
+    }
+
+    function closePhotoWall() {
+      document.getElementById('photoWall').classList.remove('active');
+    }
+
+    function showLightboxFromWall(index) {
+      currentPhotoIndex = index;
+      openLightbox(photoWallImages[index]);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Escape') {
+        closeLightbox();
+        closePhotoWall();
+      } else if (e.key === 't' || e.key === 'T') {
+        toggleTOC();
+      } else if (e.key === 'ArrowUp') {
+        if (document.getElementById('photoWall').classList.contains('active')) {
+          e.preventDefault();
+          currentPhotoIndex = Math.max(0, currentPhotoIndex - 1);
+          document.querySelectorAll('.photo-wall-item').forEach((item, i) => {
+            item.style.borderColor = i === currentPhotoIndex ? 'var(--accent-cyan)' : 'transparent';
+          });
+        }
+      } else if (e.key === 'ArrowDown') {
+        if (document.getElementById('photoWall').classList.contains('active')) {
+          e.preventDefault();
+          currentPhotoIndex = Math.min(photoWallImages.length - 1, currentPhotoIndex + 1);
+          document.querySelectorAll('.photo-wall-item').forEach((item, i) => {
+            item.style.borderColor = i === currentPhotoIndex ? 'var(--accent-cyan)' : 'transparent';
+          });
+        }
+      } else if (e.key === 'Home') {
+        goToSlide(1);
+      } else if (e.key === 'End') {
+        goToSlide(totalSlides);
+      }
+    });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
+      }
+    }
+
+    document.querySelectorAll('.screenshot').forEach(img => {
+      img.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const allImages = Array.from(document.querySelectorAll('.screenshot'));
+        const index = allImages.indexOf(img);
+        openPhotoWall(allImages, index);
+      });
+    });
+
+    init();
+  </script>
+</body>
+
+</html>
