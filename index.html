@@ -817,7 +817,7 @@
     .photo-wall-item img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
     }
 
     @keyframes titleSlide {
@@ -940,6 +940,26 @@
     @keyframes border-flow {
       0% { background-position: 0% 50%; }
       100% { background-position: 200% 50%; }
+    }
+
+    .workflow-step {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .workflow-step.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .workflow-arrow {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .workflow-arrow.visible {
+      opacity: 1;
     }
 
     .overview-card h3 {
@@ -1120,7 +1140,7 @@
     <section class="slide slide-cover active" data-slide="1" data-title="封面">
       <div class="grid-bg"></div>
       <div class="slide-content">
-        <h1><span style="margin-right: -0.05em;">AI</span>应用开发实战情况</h1>
+        <h1><span style="margin-right: -0.05em;">AI</span> 应用开发实战情况</h1>
         <p class="subtitle" style="color: var(--text-secondary); font-size: 1.2rem; margin-top: 10px;" id="currentDate"></p>
         <div class="tech-badge" style="margin-top: 30px;">汇报人：王会鹏</div>
       </div>
@@ -1156,34 +1176,36 @@
       <div class="slide-content">
         <div class="section-header">
           <div class="section-icon">📋</div>
-          <h2>fetch-menus：菜单备份 Skill</h2>
+          <h2>菜单备份 Skill：fetch-menus</h2>
         </div>
-        <h3>痛点</h3>
-        <p>数据同步时可能覆盖其他系统的新增菜单，导致菜单丢失。之前靠后端提醒、前端手动备份，但一个系统有 <strong>6 个环境</strong>（dev/test/pngs/ungs/stngs/production），一个人维护多个系统，手动备份非常繁琐。</p>
-        <div class="highlight-box green">
-          <p><strong>解决方案：</strong>开发 fetch-menus skill，一句话即可单个或批量备份各环境菜单，覆盖 20+ 站点系统。</p>
+        <div class="two-col">
+          <div>
+            <h3>痛点</h3>
+            <p style="word-break: break-all;">数据同步时可能覆盖其他系统的新增菜单，导致菜单丢失。之前靠后端提醒、前端手动备份，但一个系统有 <strong>6 个环境</strong>（dev/test/pngs/ungs/stngs/production），一个人维护多个系统，手动备份非常繁琐。</p>
+            <div class="highlight-box green">
+              <p><strong>解决方案：</strong>开发 fetch-menus skill，一句话即可单个或批量备份各环境菜单，覆盖 20+ 站点系统。</p>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: center;">
+            <img src="images/fetch-menus.png" alt="fetch-menus效果" class="screenshot" onclick="openLightbox(this)" style="max-width: 100%; max-height: 480px; height: auto; border-radius: 8px;">
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Slide 4: fetch-menus 效果与提示词 -->
-    <section class="slide" data-slide="4" data-title="提示词与效果">
+    <!-- Slide 4: fetch-menus 提示词 -->
+    <section class="slide" data-slide="4" data-title="fetch-menus：提示词">
       <div class="grid-bg"></div>
       <div class="slide-content">
-        <h2>提示词与效果</h2>
-        <div class="two-col">
-          <div>
-            <h3>单个备份</h3>
-            <div class="code-block">
-              <pre><code>备份核酸制备系统的dev环境菜单，令牌是 xxxxxxxxxxxxxxxx</code></pre>
-            </div>
-            <h3>批量备份</h3>
-            <div class="code-block">
-              <pre><code>备份蛋白生产、荧光定量V2、核酸制备系统的所有环境菜单</code></pre>
-            </div>
+        <h2>提示词</h2>
+        <div style="max-width: 800px; margin: 0 auto;">
+          <h3>单个备份</h3>
+          <div class="code-block">
+            <pre><code>备份核酸制备系统的dev环境菜单，令牌是 xxxxxxxxxxxxxxxx</code></pre>
           </div>
-          <div style="display: flex; align-items: center;">
-            <img src="images/fetch-menus.png" alt="fetch-menus效果" class="screenshot" onclick="openLightbox(this)" style="max-width: 100%; max-height: 480px; height: auto; border-radius: 8px;">
+          <h3>批量备份</h3>
+          <div class="code-block">
+            <pre><code>备份蛋白生产、荧光定量V2、核酸制备系统的所有环境菜单</code></pre>
           </div>
         </div>
       </div>
@@ -1195,7 +1217,7 @@
       <div class="slide-content">
         <div class="section-header">
           <div class="section-icon">🎨</div>
-          <h2>tech-poster：知识分享海报 Skill</h2>
+          <h2>知识分享海报 Skill：tech-poster</h2>
         </div>
         <div class="two-col">
           <div>
@@ -1237,7 +1259,7 @@
       <div class="slide-content">
         <div class="section-header">
           <div class="section-icon">🔔</div>
-          <h2>claude-session-monitor</h2>
+          <h2>消息通知 MCP Server：claude-session-monitor</h2>
         </div>
         <div class="two-col">
           <div>
@@ -1277,8 +1299,8 @@
           </div>
           <div>
             <div class="screenshot-container">
-              <img src="images/notify-success.png" alt="成功通知" class="screenshot" style="width: 46%; height: 200px; object-fit: cover;" onclick="openLightbox(this)">
-              <img src="images/notify-fail.png" alt="失败通知" class="screenshot" style="width: 46%; height: 200px; object-fit: cover;" onclick="openLightbox(this)">
+              <img src="images/notify-success.png" alt="成功通知" class="screenshot" style="width: 46%; height: 200px; object-fit: contain; background-color: white;" onclick="openLightbox(this)">
+              <img src="images/notify-fail.png" alt="失败通知" class="screenshot" style="width: 46%; height: 200px; object-fit: contain; background-color: white;" onclick="openLightbox(this)">
             </div>
           </div>
         </div>
@@ -1319,7 +1341,7 @@
       <div class="slide-content">
         <div class="section-header">
           <div class="section-icon">🧪</div>
-          <h2>自动化测试初探</h2>
+          <h2>AI 驱动的自动化测试初探</h2>
         </div>
         <div class="two-col">
           <div>
@@ -1470,15 +1492,15 @@
         <div class="three-col" style="align-items: stretch;">
           <div class="card" style="display: flex; flex-direction: column;">
             <h3>实验人员 - 列表页面</h3>
-            <img src="images/slide17-list.png" alt="实验人员列表加载" class="screenshot" style="margin-top: auto; max-height: 340px; width: 100%; object-fit: contain; cursor: pointer;" onclick="openLightbox(this)">
+            <img src="images/slide17-list.png" alt="实验人员列表加载" class="screenshot" style="margin-top: auto; max-height: 340px; width: 100%; object-fit: cover; cursor: pointer;" onclick="openLightbox(this)">
           </div>
           <div class="card" style="display: flex; flex-direction: column;">
             <h3>抽提方法 - 编辑页面被打开</h3>
-            <img src="images/slide17-extraction.png" alt="抽提方法编辑打开" class="screenshot" style="max-height: 340px; width: 100%; object-fit: contain; cursor: pointer;" onclick="openLightbox(this)">
+            <img src="images/slide17-extraction.png" alt="抽提方法编辑打开" class="screenshot" style="max-height: 340px; width: 100%; object-fit: cover; cursor: pointer;" onclick="openLightbox(this)">
           </div>
           <div class="card" style="display: flex; flex-direction: column;">
             <h3>混样方案 - 编辑弹窗组件被打开</h3>
-            <img src="images/slide17-mix.png" alt="混样方案编辑打开" class="screenshot" style="max-height: 340px; width: 100%; object-fit: contain; cursor: pointer;" onclick="openLightbox(this)">
+            <img src="images/slide17-mix.png" alt="混样方案编辑打开" class="screenshot" style="max-height: 340px; width: 100%; object-fit: cover; cursor: pointer;" onclick="openLightbox(this)">
           </div>
         </div>
         <div class="highlight-box green" style="margin-top: 1rem;">
@@ -1522,40 +1544,40 @@
       <div class="slide-content">
         <h2>对于 AI 自动化编排的思考</h2>
 
-        <div style="display: flex; flex-direction: column; gap: 0.6rem; max-width: 900px; width: 100%;">
-          <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-cyan);">
+        <div class="workflow-container" style="display: flex; flex-direction: column; gap: 0.6rem; max-width: 900px; width: 100%;">
+          <div class="workflow-step" style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-cyan);">
             <span style="font-size: 1.5rem; min-width: 44px; text-align: center;">🧪</span>
             <div style="flex: 1;">
               <p style="margin: 0; color: var(--accent-cyan); font-weight: 600;">1. 自动化系统测试</p>
               <p style="margin: 0.2rem 0 0; font-size: 0.9rem;">AI + Playwright + Superpowers 按测试文档驱动执行，覆盖列表页、表单详情页等完整业务流程，自动截图留档</p>
             </div>
           </div>
-          <div style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
-          <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-blue);">
+          <div class="workflow-arrow" style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
+          <div class="workflow-step" style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-blue);">
             <span style="font-size: 1.5rem; min-width: 44px; text-align: center;">📊</span>
             <div style="flex: 1;">
               <p style="margin: 0; color: var(--accent-blue); font-weight: 600;">2. 智能分析测试报告</p>
               <p style="margin: 0.2rem 0 0; font-size: 0.9rem;">AI 解析测试报告：Minimax MCP 识别控制台/页面截图中的错误，DeepSeek 分析提取的文本信息，精准定位 Bug 根因</p>
             </div>
           </div>
-          <div style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
-          <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-purple);">
+          <div class="workflow-arrow" style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
+          <div class="workflow-step" style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-purple);">
             <span style="font-size: 1.5rem; min-width: 44px; text-align: center;">🔧</span>
             <div style="flex: 1;">
               <p style="margin: 0; color: var(--accent-purple); font-weight: 600;">3. AI 自动修复代码</p>
               <p style="margin: 0.2rem 0 0; font-size: 0.9rem;">AI 根据第 2 步的定位信息自动修复问题模块，修复后触发 Playwright 回归测试</p>
             </div>
           </div>
-          <div style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
-          <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-orange);">
+          <div class="workflow-arrow" style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
+          <div class="workflow-step" style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-orange);">
             <span style="font-size: 1.5rem; min-width: 44px; text-align: center;">👀</span>
             <div style="flex: 1;">
               <p style="margin: 0; color: var(--accent-orange); font-weight: 600;">4. 人工审核 + 复测确认</p>
               <p style="margin: 0.2rem 0 0; font-size: 0.9rem;">修复完成后 claude-session-monitor MCP 会及时通知提醒开发者，人工 Review 代码变更并执行复测，确保 Bug 真实解决</p>
             </div>
           </div>
-          <div style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
-          <div style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-green);">
+          <div class="workflow-arrow" style="text-align: center; color: var(--accent-cyan); font-size: 1.2rem;">↓</div>
+          <div class="workflow-step" style="display: flex; align-items: center; gap: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.5rem; border-left: 4px solid var(--accent-green);">
             <span style="font-size: 1.5rem; min-width: 44px; text-align: center;">🚀</span>
             <div style="flex: 1;">
               <p style="margin: 0; color: var(--accent-green); font-weight: 600;">5. AI 自动提交代码</p>
@@ -1785,7 +1807,38 @@
         if (itemEl) itemEl.classList.add('active');
       }
 
+      // 触发第18页工作流步骤动画
+      if (currentSlide === 18) {
+        animateWorkflowSteps();
+      } else {
+        // 重置其他页面的工作流步骤
+        document.querySelectorAll('.workflow-step, .workflow-arrow').forEach(el => {
+          el.classList.remove('visible');
+        });
+      }
+
       if (typeof Prism !== 'undefined') Prism.highlightAll();
+    }
+
+    function animateWorkflowSteps() {
+      const steps = document.querySelectorAll('.workflow-step');
+      const arrows = document.querySelectorAll('.workflow-arrow');
+      let delay = 0;
+      const stepDelay = 400;
+
+      steps.forEach((step, index) => {
+        setTimeout(() => {
+          step.classList.add('visible');
+        }, delay);
+        delay += stepDelay;
+
+        if (index < arrows.length) {
+          setTimeout(() => {
+            arrows[index].classList.add('visible');
+          }, delay);
+          delay += stepDelay;
+        }
+      });
     }
 
     function nextSlide() {
